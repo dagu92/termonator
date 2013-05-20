@@ -1,6 +1,8 @@
 termonator
-==========
 
 Simulación de un sistema de gestión de calefacción remoto
-Dani Maricaaaaaaaaaaaaaaaaaaaaaaaaaaa
-Asier leflux
+
+Contributors:
+Dani Erre
+David Gutierrez
+Asier Aduriz
