@@ -1,7 +1,7 @@
 #ifndef TERMONATOR_ICE
 #define TERMONATOR_ICE
 module utils {
-       interface DeviceI {
+       interface Controller {
 		 bool heaterOn ();
 		 bool heaterOff ();
 		 bool setTemperature (double temperature);
@@ -11,7 +11,7 @@ module utils {
        interface Boiler {
 		 bool turnOn();
 		 bool turnOff();
-		 void addController(utils::Controlador* proxy);
+		 void addController(utils::Controller* proxy);
   };
 };
 
