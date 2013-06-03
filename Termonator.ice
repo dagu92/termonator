@@ -4,10 +4,10 @@ module utils {
   interface Controlador {
   
   };
-  interface Caldera {
-    bool encender();
-    bool apagar();
-    void anadirCaldera(utils::Controlador* proxy);
+  interface Boiler {
+    bool turnOn();
+    bool turnOff();
+    void addController(utils::Controlador* proxy);
   };
 };
 #endif
