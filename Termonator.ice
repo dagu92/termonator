@@ -11,7 +11,7 @@ module utils {
   interface Boiler {
     bool turnOn();
     bool turnOff();
-    void addController(int floor, string door, utils::Controlador* proxy);
+    void addController(int floor, string door, utils::Controller* proxy);
     bool turnOnHeating(int floor, string door);
     bool turnOffHeating(int floor, string door);
     void changeTemperature(int floor, string door, int temperature);
