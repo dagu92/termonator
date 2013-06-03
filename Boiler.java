@@ -12,7 +12,8 @@ public class Boiler extends _BoilerDisp {
     controllerList = new ArrayList<ControladorPrx>();
   }
 
-  public void addController(ControladorPrx proxy, Current __current) {
+  public void addController(int floor, String door, ControladorPrx proxy,
+                            Current __current) {
     if(controllerList.contains(proxy) == false) {
       controllerList.add(proxy);
     }
@@ -34,5 +35,36 @@ public class Boiler extends _BoilerDisp {
       status = true;
       return true;
     }
+  }
+
+  public boolean turnOffHeating(int floor, String door, Current __current) {
+    for(ControladorPrx item: controllerList) {
+      if(item.getFloor() == floor && item.getDoor() == door) {
+        if(item.turnOff() == false) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+    return false; //Dbg: Rise an exception??
+  }
+  
+  public boolean turnOnHeating(int floor, String door, Current __current) {
+    for(ControladorPrx item: controllerList) {
+      if(item.getFloor() == floor && item.getDoor() == door) {
+        if(item.turnOn() == false) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    }
+    return false; //Dbg: Rise an exception??
+  }
+
+  public void changeTemperature(int floor, String door, int temperature,
+                                Current __current) {
+    
   }
 }
