@@ -1,4 +1,5 @@
 import utils._BoilerDisp;
+import utils.ControllerPrx;
 import Ice.Current;
 import java.util.ArrayList;
 
@@ -12,7 +13,7 @@ public class Boiler extends _BoilerDisp {
     controllerList = new ArrayList<Controller>();
   }
 
-  public boolean addController(int floor, String door, Controller proxy,
+  public boolean addController(int floor, String door, ControllerPrx proxy,
                             Current __current) {
     Controller tmpController = new Controller(floor, door, proxy);
     if(controllerList.contains(tmpController) == false) {
@@ -44,7 +45,7 @@ public class Boiler extends _BoilerDisp {
   public boolean turnOffHeating(int floor, String door, Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        if(item.turnOff() == false) {
+        if(item.getProxy().heaterOff() == false) {
           return false;
         } else {
           return true;
@@ -57,7 +58,7 @@ public class Boiler extends _BoilerDisp {
   public boolean turnOnHeating(int floor, String door, Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        if(item.turnOn() == false) {
+        if(item.getProxy().heaterOn() == false) {
           return false;
         } else {
           return true;
@@ -67,11 +68,11 @@ public class Boiler extends _BoilerDisp {
     return false; //Dbg: Rise an exception??
   }
 
-  public void changeTemperature(int floor, String door, int temperature,
+  public void changeTemperature(int floor, String door, double temperature,
                                 Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        item.changeTemperature(temperature);
+        item.getProxy().setTemperature(temperature);
       }
     }
   }
