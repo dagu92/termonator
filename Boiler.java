@@ -1,21 +1,25 @@
-import utils.*;
+import utils._BoilerDisp;
 import Ice.Current;
 import java.util.ArrayList;
 
 public class Boiler extends _BoilerDisp {
 
   private boolean status;
-  private ArrayList<ControladorPrx> controllerList;
+  private ArrayList<Controller> controllerList;
 
   public Boiler() {
     status = false;
-    controllerList = new ArrayList<ControladorPrx>();
+    controllerList = new ArrayList<Controller>();
   }
 
-  public void addController(int floor, String door, ControladorPrx proxy,
+  public boolean addController(int floor, String door, Controller proxy,
                             Current __current) {
-    if(controllerList.contains(proxy) == false) {
-      controllerList.add(proxy);
+    Controller tmpController = new Controller(floor, door, proxy);
+    if(controllerList.contains(tmpController) == false) {
+      controllerList.add(tmpController);
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -38,7 +42,7 @@ public class Boiler extends _BoilerDisp {
   }
 
   public boolean turnOffHeating(int floor, String door, Current __current) {
-    for(ControladorPrx item: controllerList) {
+    for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         if(item.turnOff() == false) {
           return false;
@@ -51,7 +55,7 @@ public class Boiler extends _BoilerDisp {
   }
   
   public boolean turnOnHeating(int floor, String door, Current __current) {
-    for(ControladorPrx item: controllerList) {
+    for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         if(item.turnOn() == false) {
           return false;
@@ -65,6 +69,10 @@ public class Boiler extends _BoilerDisp {
 
   public void changeTemperature(int floor, String door, int temperature,
                                 Current __current) {
-    
+    for(Controller item: controllerList) {
+      if(item.getFloor() == floor && item.getDoor() == door) {
+        item.changeTemperature(temperature);
+      }
+    }
   }
 }
