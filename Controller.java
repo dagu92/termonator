@@ -12,15 +12,15 @@ public class Controller {
     _floor = floor;
   }
 
-  public int getFloor(void) {
+  public int getFloor() {
     return _floor;
   }
 
-  public String getDoor(void) {
+  public String getDoor() {
     return _door;
   }
 
-  public ControllerPrx getProxy(void) {
+  public ControllerPrx getProxy() {
     return _proxy;
   }
 }
