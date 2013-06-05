@@ -42,6 +42,10 @@ public class Boiler extends _BoilerDisp {
     }
   }
 
+  public boolean getStatus(Current __current) {
+    return status;
+  }
+
   public boolean turnOffHeating(int floor, String door, Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
@@ -73,6 +77,24 @@ public class Boiler extends _BoilerDisp {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         item.getProxy().setTemperature(temperature);
+        break;
+      }
+    }
+  }
+
+  public boolean getHeatingStatus(int floor, String door, Current __current) {
+    for(Controller item: controllerList) {
+      if(item.getFloor() == floor && item.getDoor() == door) {
+        return item.getProxy().getStatus();
+      }
+    }
+  }
+
+  public double getHeatingConsumption(int floor, String door,
+                                      Current __current) {
+    for(Controller item: controllerList) {
+      if(item.getFloor() == floor && item.getDoor() == door) {
+        return item.getProxy().getConsumption();
       }
     }
   }
