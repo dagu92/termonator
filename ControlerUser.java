@@ -22,21 +22,35 @@ public class ControlerUser {
   private ArrayList<Boiler> _BoilerList;
   private BoilerPrx _boilerProxy;
   private String _secret;
-  private double _temperature;
+  private double _setTemperature, _temperatureStatus;
+  private boolean _status;
 	
 	public void HeaterStatus(String u_name){
 		takeFromDataBase(u_name);
     takeBoilerPrx();
     takeSecret();
     try {
-      _boilerProxy.getHeatingStatus(_secret, _floor, _door);
+     _status = _boilerProxy.getHeatingStatus(_secret, _floor, _door);
     } catch (InvalidSecretException e) {
       System.out.println("INCORRECT secret");
     } catch (ItemNotFoundException e) {
       System.out.println("Cannot Connect to the House. Put in contact with" +
           "us");
     }
-		
+		if(_status = true){
+		  try {
+        _temperatureStatus = _boilerProxy.getHeatingTemperature(
+            _secret, _floor, _door);
+      } catch (InvalidSecretException e) {
+        System.out.println("INCORRECT secret");
+      } catch (ItemNotFoundException e) {
+        System.out.println("Cannot Connect to the House. Put in contact with" +
+            "us");
+      }
+		  System.out.println("Your heating is ON");
+		  System.out.println("Your heating is established on "+_temperatureStatus+
+		      "ºC");
+		}
 		
 	}
 	
@@ -47,12 +61,12 @@ public class ControlerUser {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     System.out.println("Insert the temperature (ºC)");
       try {
-        _temperature = Double.valueOf(br.readLine());
+        _setTemperature = Double.valueOf(br.readLine());
       } catch (IOException e) {
         System.out.println("ERROR taking input data");
       } 
     try {
-      _boilerProxy.changeTemperature(_secret, _floor, _door, _temperature);
+      _boilerProxy.changeTemperature(_secret, _floor, _door, _setTemperature);
     } catch (InvalidSecretException e) {
       System.out.println("INCORRECT secret");
     } catch (ItemNotFoundException e) {
@@ -60,7 +74,7 @@ public class ControlerUser {
           "us");
     }
     System.out.println("Your heating temperature is now established on " 
-        +_temperature+"ºC");
+        +_setTemperature+"ºC");
 	}
 	
 	public void SwitchON(String u_name){
