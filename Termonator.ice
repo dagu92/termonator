@@ -21,9 +21,10 @@ module utils {
     bool turnOffHeating(string secret, int floor, string door) throws InvalidSecretException, ItemNotFoundException;
     void changeTemperature(string secret, int floor, string door, double temperature) throws InvalidSecretException, ItemNotFoundException;
     bool getHeatingStatus(string secret, int floor, string door) throws InvalidSecretException, ItemNotFoundException;
+    double getHeatingTemperature(string secret, int floor, string door) throws InvalidSecretException, ItemNotFoundException;
     double getHeatingConsumption(int floor, string door) throws ItemNotFoundException;
   };
-interface DataBase
+ interface DataBase
 	{
 		void SaveIncident(string incident);
 		void addBoilerController(string street, int portal, utils::Boiler* proxy);
