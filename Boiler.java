@@ -46,10 +46,11 @@ public class Boiler extends _BoilerDisp {
     return status;
   }
 
-  public boolean turnOffHeating(int floor, String door, Current __current) {
+  public boolean turnOffHeating(String secret, int floor, String door,
+                                Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        if(item.getProxy().heaterOff() == false) {
+        if(item.getProxy().heaterOff(secret) == false) {
           return false;
         } else {
           return true;
@@ -59,10 +60,11 @@ public class Boiler extends _BoilerDisp {
     return false; //Dbg: Rise an exception??
   }
   
-  public boolean turnOnHeating(int floor, String door, Current __current) {
+  public boolean turnOnHeating(String secret, int floor, String door,
+                               Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        if(item.getProxy().heaterOn() == false) {
+        if(item.getProxy().heaterOn(secret) == false) {
           return false;
         } else {
           return true;
@@ -72,29 +74,30 @@ public class Boiler extends _BoilerDisp {
     return false; //Dbg: Rise an exception??
   }
 
-  public void changeTemperature(int floor, String door, double temperature,
-                                Current __current) {
+  public void changeTemperature(String secret, int floor, String door,
+                                double temperature, Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        item.getProxy().setTemperature(temperature);
+        item.getProxy().setTemperature(secret, temperature);
         break;
       }
     }
   }
 
-  public boolean getHeatingStatus(int floor, String door, Current __current) {
+  public boolean getHeatingStatus(String secret, int floor, String door,
+                                  Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        return item.getProxy().getStatus();
+        return item.getProxy().getStatus(secret);
       }
     }
   }
 
-  public double getHeatingConsumption(int floor, String door,
+  public double getHeatingConsumption(String secret, int floor, String door,
                                       Current __current) {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        return item.getProxy().getConsumption();
+        return item.getProxy().getConsumption(secret);
       }
     }
   }
