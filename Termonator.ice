@@ -2,7 +2,8 @@
 #define TERMONATOR_ICE
 module utils {
   exception InvalidSecretException {
-    
+  };
+  exception ItemNotFoundException {
   };
   interface Controller {
     bool heaterOn (string secret) throws InvalidSecretException;
@@ -15,12 +16,12 @@ module utils {
     bool turnOn();
     bool turnOff();
     bool getStatus();
-    bool addController(int floor, string door, utils::Controller* proxy) throws InvalidSecretException;
-    bool turnOnHeating(string secret, int floor, string door) throws InvalidSecretException;
-    bool turnOffHeating(string secret, int floor, string door) throws InvalidSecretException;
-    void changeTemperature(string secret, int floor, string door, double temperature) throws InvalidSecretException;
-    bool getHeatingStatus(string secret, int floor, string door) throws InvalidSecretException;
-    double getHeatingConsumption(int floor, string door);
+    bool addController(int floor, string door, utils::Controller* proxy) throws InvalidSecretException, ItemNotFoundException;
+    bool turnOnHeating(string secret, int floor, string door) throws InvalidSecretException, ItemNotFoundException;
+    bool turnOffHeating(string secret, int floor, string door) throws InvalidSecretException, ItemNotFoundException;
+    void changeTemperature(string secret, int floor, string door, double temperature) throws InvalidSecretException, ItemNotFoundException;
+    bool getHeatingStatus(string secret, int floor, string door) throws InvalidSecretException, ItemNotFoundException;
+    double getHeatingConsumption(int floor, string door) throws ItemNotFoundException;
   };
   interface DataBase {
 

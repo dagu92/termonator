@@ -1,6 +1,7 @@
 import utils._BoilerDisp;
 import utils.ControllerPrx;
 import utils.InvalidSecretException;
+import utils.ItemNotFoundException;
 import Ice.Current;
 import java.util.ArrayList;
 
@@ -49,7 +50,8 @@ public class Boiler extends _BoilerDisp {
 
   public boolean turnOffHeating(String secret, int floor, String door,
                                 Current __current)
-                                throws InvalidSecretException {
+                                throws InvalidSecretException,
+                                       ItemNotFoundException {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         if(item.getProxy().heaterOff(secret) == false) {
@@ -59,12 +61,13 @@ public class Boiler extends _BoilerDisp {
         }
       }
     }
-    return false; //Dbg: Throw an exception??
+    throw new ItemNotFoundException();
   }
   
   public boolean turnOnHeating(String secret, int floor, String door,
                                Current __current)
-                               throws InvalidSecretException {
+                               throws InvalidSecretException,
+                                      ItemNotFoundException {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         if(item.getProxy().heaterOn(secret) == false) {
@@ -74,23 +77,26 @@ public class Boiler extends _BoilerDisp {
         }
       }
     }
-    return false; //Dbg: Throw an exception??
+    throw new ItemNotFoundException();
   }
 
   public void changeTemperature(String secret, int floor, String door,
                                 double temperature, Current __current)
-                                throws InvalidSecretException {
+                                throws InvalidSecretException,
+                                       ItemNotFoundException {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         item.getProxy().setTemperature(secret, temperature);
         break;
       }
     }
+    throw new ItemNotFoundException();
   }
 
   public boolean getHeatingStatus(String secret, int floor, String door,
                                   Current __current)
-                                  throws InvalidSecretException {
+                                  throws InvalidSecretException,
+                                         ItemNotFoundException {
     boolean item_found = false;
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
@@ -98,12 +104,12 @@ public class Boiler extends _BoilerDisp {
         return item.getProxy().getStatus(secret);
       }
     }
-    if(!item_found) return false; //Dbg: Throw an exception??
-    else return false;
+    throw new ItemNotFoundException();
   }
 
   public double getHeatingConsumption(int floor, String door,
-                                      Current __current) {
+                                      Current __current)
+                                      throws ItemNotFoundException {
     boolean item_found = false;
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
@@ -111,7 +117,6 @@ public class Boiler extends _BoilerDisp {
         return item.getProxy().getConsumption();
       }
     }
-    if(!item_found) return 0; //Dbg: Throw an exception??
-    else return 0;
+    throw new ItemNotFoundException();
   }
 }
