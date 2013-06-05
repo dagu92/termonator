@@ -1,5 +1,6 @@
 import utils._BoilerDisp;
 import utils.ControllerPrx;
+import utils.InvalidSecretException;
 import Ice.Current;
 import java.util.ArrayList;
 
@@ -47,7 +48,8 @@ public class Boiler extends _BoilerDisp {
   }
 
   public boolean turnOffHeating(String secret, int floor, String door,
-                                Current __current) {
+                                Current __current)
+                                throws InvalidSecretException {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         if(item.getProxy().heaterOff(secret) == false) {
@@ -57,11 +59,12 @@ public class Boiler extends _BoilerDisp {
         }
       }
     }
-    return false; //Dbg: Rise an exception??
+    return false; //Dbg: Throw an exception??
   }
   
   public boolean turnOnHeating(String secret, int floor, String door,
-                               Current __current) {
+                               Current __current)
+                               throws InvalidSecretException {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         if(item.getProxy().heaterOn(secret) == false) {
@@ -71,11 +74,12 @@ public class Boiler extends _BoilerDisp {
         }
       }
     }
-    return false; //Dbg: Rise an exception??
+    return false; //Dbg: Throw an exception??
   }
 
   public void changeTemperature(String secret, int floor, String door,
-                                double temperature, Current __current) {
+                                double temperature, Current __current)
+                                throws InvalidSecretException {
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
         item.getProxy().setTemperature(secret, temperature);
@@ -85,20 +89,29 @@ public class Boiler extends _BoilerDisp {
   }
 
   public boolean getHeatingStatus(String secret, int floor, String door,
-                                  Current __current) {
+                                  Current __current)
+                                  throws InvalidSecretException {
+    boolean item_found = false;
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
+        item_found = true;
         return item.getProxy().getStatus(secret);
       }
     }
+    if(!item_found) return false; //Dbg: Throw an exception??
+    else return false;
   }
 
-  public double getHeatingConsumption(String secret, int floor, String door,
+  public double getHeatingConsumption(int floor, String door,
                                       Current __current) {
+    boolean item_found = false;
     for(Controller item: controllerList) {
       if(item.getFloor() == floor && item.getDoor() == door) {
-        return item.getProxy().getConsumption(secret);
+        item_found = true;
+        return item.getProxy().getConsumption();
       }
     }
+    if(!item_found) return 0; //Dbg: Throw an exception??
+    else return 0;
   }
 }
