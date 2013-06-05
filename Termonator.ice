@@ -1,13 +1,16 @@
 #ifndef TERMONATOR_ICE
 #define TERMONATOR_ICE
 module utils {
+  exception InvalidSecretException {
+    
+  };
   interface Controller {
-    bool heaterOn ();
-    bool heaterOff ();
-    bool setTemperature (double temperature);
-    bool getStatus ();
-    double getConsumption ();
-  }; 
+    bool heaterOn (string secret) throws InvalidSecretException;
+    bool heaterOff (string secret) throws InvalidSecretException;
+    bool setTemperature (string secret, double temperature) throws InvalidSecretException;
+    bool getStatus (string secret) throws InvalidSecretException;
+    double getConsumption (string secret) throws InvalidSecretException;
+  };	
   interface Boiler {
     bool turnOn();
     bool turnOff();
