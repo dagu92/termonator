@@ -8,6 +8,7 @@ import utils.BoilerPrx;
  * 2 --> Switch On
  * 3 --> ShutDown
  */
+import utils.ItemNotFoundException;
 
 public class BoilerWorker {
   
@@ -69,6 +70,12 @@ public class BoilerWorker {
     } catch (IOException e) {
       System.out.println("ERROR Inserting DATA");
     }
-    //FALTA LLAMAR FUNCIÓN
-	}
+    try {
+      boilerPrx.getHeatingConsumption(floor, door);
+    } catch (ItemNotFoundException e) {
+      System.out.println("The house that you're consulting doesn't exist or" +
+      		"the house is now unvailable");
+      		
+    }
+   }
 }
