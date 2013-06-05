@@ -11,7 +11,8 @@ public class Sede {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Ice.Communicator ic = Ice.Util.initialize(args);
-		Ice.ObjectAdapter adapter = ic.createObjectAdapterWithEndpoints("ServerAdapter", "tcp -h 127.0.0.1 -p 10000");
+		Ice.ObjectAdapter adapter = ic.createObjectAdapterWithEndpoints(
+		    "ServerAdapter", "tcp -h 127.0.0.1 -p 10000");
 		DataBaseI dbI = new DataBaseI();
 		adapter.add(dbI,ic.stringToIdentity("DataBase"));
 		adapter.activate();
@@ -86,29 +87,31 @@ public class Sede {
 		int option = -1;
 		while(option != 0){
 		System.out.println("");
-		System.out.println("********************************************************************");
+		System.out.println("**********************************************" +
+				"**********************");
 		System.out.println("Welcome "+u_name+" to Termonator 1.0");
 		System.out.println("1.- See heater Status");
 		System.out.println("2.- Modify Heater Temperature");
 		System.out.println("3.- Switch ON your heater");
 		System.out.println("4.- Switch OFF your heater");
 		System.out.println("0.- Exit");
-		System.out.println("********************************************************************");
+		System.out.println("**********************************************" +
+				"**********************");
 		System.out.print("Your Option: ");
 		option = teclado.nextInt();
-		ExecuteMenuUser(option);
+		ExecuteMenuUser(option,u_name);
 		}
 	}
-	public static void ExecuteMenuUser(int option){
-		Controlador heater = new Controlador();
+	public static void ExecuteMenuUser(int option, String u_name){
+		ControlerUser heater = new ControlerUser();
 		switch(option){
-		case 1: heater.HeaterStatus();
+		case 1: heater.HeaterStatus(u_name);
 			break;
-		case 2: heater.ModifyTemperature();
+		case 2: heater.ModifyTemperature(u_name);
 			break;
-		case 3: heater.SwitchON();
+		case 3: heater.SwitchON(u_name);
 			break;
-		case 4: heater.SwitchOFF();
+		case 4: heater.SwitchOFF(u_name);
 			break;
 		case 0:
 			break;
@@ -123,13 +126,15 @@ public class Sede {
 		int option =-1;
 		while (option != 0){
 		System.out.println("");
-		System.out.println("********************************************************************");
+		System.out.println("*************************************************" +
+				"*******************");
 		System.out.println("Welcome "+u_name+" to Termonator 1.0");
 		System.out.println("1.- See Consumption of a concrete Home");
 		System.out.println("2.- Switch ON a boiler of a specific neighbourhood");
 		System.out.println("3.- Switch OFF a boiler of a specific neighbourhood");
 		System.out.println("0.- Exit");
-		System.out.println("********************************************************************");
+		System.out.println("*************************************************" +
+				"*******************");
 		System.out.print("Your Option: ");
 		option = teclado.nextInt();
 		ExecuteMenuWorker(option);
@@ -137,15 +142,20 @@ public class Sede {
 	}
 	
 	public static void ExecuteMenuWorker(int option){
-		Caldera boiler = new Caldera();
+		BoilerWorker boiler = new BoilerWorker();
+		/*1 --> See consumption
+		 * 2 --> Switch On
+		 * 3 --> ShutDown
+		 */
+		
 		switch(option){
-		case 1: boiler.SeeConsumption();
+		case 1: boiler.insertNeighbourhood(1);
 			break;
-		case 2: boiler.SwitchON();
+		case 2: boiler.insertNeighbourhood(2);
 			break;
-		case 3: boiler.SwitchOFF();
+		case 3: boiler.insertNeighbourhood(3);
 			break;
-		case 0:
+		case 0: System.out.println("Bye");
 			break;
 		default: 
 			System.out.println("Incorrect Option. Try again.");
