@@ -25,12 +25,27 @@ public class ControlerUser {
   private double _setTemperature, _temperatureStatus;
   private boolean _status;
 	
+  public ControlerUser(DataBaseI dbI) {
+  	this._takeBoilers = dbI;
+  }
+
+	/**
+	 * @brief Función que se utiliza para comprobar el estado de la calefacción, de la casa
+	 * del usuario cliente que realizó el login previamente. Aquí el usuario deberá introducir
+	 * la secret que ha fijado en su controlador mediante la funcion takeSecret.
+	 * Existen dos excepciones dentro de la función una si la secret introducida es incorrecta y otra si no
+	 * es posible la conexión con su controlador.
+	 * Al final de la función se muestra al usuario el estado de la calefacciçon
+	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
+	 * usuario dentro de la base de datos. Para ello se ejecuta la función takeFromDataBase.
+	 */
 	public void HeaterStatus(String u_name){
 		takeFromDataBase(u_name);
     takeBoilerPrx();
     takeSecret();
     try {
      _status = _boilerProxy.getHeatingStatus(_secret, _floor, _door);
+     System.out.println("Status "+_status);
     } catch (InvalidSecretException e) {
       System.out.println("INCORRECT secret");
     } catch (ItemNotFoundException e) {
@@ -51,9 +66,21 @@ public class ControlerUser {
 		  System.out.println("Your heating is established on "+_temperatureStatus+
 		      "ºC");
 		}
+		else 		  System.out.println("Your heating is OFF");
+
 		
 	}
 	
+	/**
+	 * @brief Función que se utiliza para modificar la temperatura de la calefacción, de la casa
+	 * del usuario cliente que realizó el login previamente. Aquí el usuario deberá introducir
+	 * la secret que ha fijado en su controlador mediante la funcion takeSecret y la nueva temperatura que desea fijar.
+	 * Existen dos excepciones dentro de la función una si la secret introducida es incorrecta y otra si no
+	 * es posible la conexión con su controlador.
+	 * Al final de la función se muestra al usuario la nueva temperatura que se ha fijado.
+	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
+	 * usuario dentro de la base de datos. Para ello se ejecuta la función takeFromDataBase.
+	 */
 	public void ModifyTemperature(String u_name){
 	  takeFromDataBase(u_name);
     takeBoilerPrx();
@@ -77,6 +104,16 @@ public class ControlerUser {
         +_setTemperature+"ºC");
 	}
 	
+	
+	/**
+	 * @brief Función que se utiliza para encender la calefacción, de la casa
+	 * del usuario cliente que realizó el login previamente. Aquí el usuario deberá introducir
+	 * la secret que ha fijado en su controlador mediante la funcion takeSecret.
+	 * Existen dos excepciones dentro de la función una si la secret introducida es incorrecta y otra si no
+	 * es posible la conexión con su controlador.
+	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
+	 * usuario dentro de la base de datos. Para ello se ejecuta la función takeFromDataBase.
+	 */
 	public void SwitchON(String u_name){
 	  takeFromDataBase(u_name);
     takeBoilerPrx();
@@ -97,6 +134,15 @@ public class ControlerUser {
 
 	}
 	
+	/**
+	 * @brief Función que se utiliza para apagar la calefacción, de la casa
+	 * del usuario cliente que realizó el login previamente. Aquí el usuario deberá introducir
+	 * la secret que ha fijado en su controlador mediante la funcion takeSecret.
+	 * Existen dos excepciones dentro de la función una si la secret introducida es incorrecta y otra si no
+	 * es posible la conexión con su controlador.
+	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
+	 * usuario dentro de la base de datos. Para ello se ejecuta la función takeFromDataBase.
+	 */
 	public void SwitchOFF(String u_name){
 	  takeFromDataBase(u_name);
     takeBoilerPrx();
@@ -116,6 +162,15 @@ public class ControlerUser {
     }
 	}
 	
+	/**
+	 * @brief Función que se utiliza para coger los datos del controlador de la casa
+	 * del usuario cliente que realizó el login previamente. Aquí se realiza una conexión
+	 * a la base de datos.
+	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
+	 * usuario dentro de la base de datos. Mediante este parametro realizaremos la query correspondiente
+	 * a la base de datos para que todos los datos del controlador de este usuario sean cargados y podamos
+	 * establecer la comunicación con el mismo mediante ICE.
+	 */
 	public void takeFromDataBase(String u_name){
 	  
 	  Connection conn = null;
@@ -149,6 +204,11 @@ public class ControlerUser {
     }
 	}
 	
+	/**
+	 * @brief Función que se utiliza para coger el proxy del controlador central. 
+	 * Se necesita este proxy puesto que el controlador central de la vecindad del usuario será
+	 * el encargado de establecer la conexión con el controlador de la vivienda correspondiente.
+	 */
 	public void takeBoilerPrx (){
 	  _BoilerList = _takeBoilers.getBoilerList();
 	  for(Boiler item: _BoilerList){
@@ -157,6 +217,12 @@ public class ControlerUser {
 	    }
 	  }
 	}
+	
+	/**
+	 * @brief Función que se utiliza para coger pedir al usuario que introduzca la secret
+	 * correspondiente que posteriormente será necesaria para establecer la conexión con el controlador de 
+	 * su vivienda.
+	 */
 	public void takeSecret(){
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	  System.out.println("Insert your Secret");

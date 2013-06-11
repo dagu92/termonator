@@ -5,25 +5,36 @@ import java.util.Scanner;
 
 public class Sede {
 
+	private static DataBaseI dbI;
+
 	/**
-	 * @param args
+	 * @author David Gutierrez
+	 * @brief Función principal del programa site server en la que se inicializa el 
+	 * object adapter y se activa. También se carga el Login.
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Ice.Communicator ic = Ice.Util.initialize(args);
-		Ice.ObjectAdapter adapter = ic.createObjectAdapterWithEndpoints(
-		    "ServerAdapter", "tcp -h 127.0.0.1 -p 10000");
-		DataBaseI dbI = new DataBaseI();
+		Ice.ObjectAdapter adapter = ic.createObjectAdapter("ServerAdapter");
+		dbI = new DataBaseI();
 		adapter.add(dbI,ic.stringToIdentity("DataBase"));
 		adapter.activate();
 		while (true){
 			Login();
 		}
 	}
-	
+	/**
+	 * @brief FUnción en la que se realiza el login en la aplicación. 
+	 * Primero se le pide el usuario y contraseña al usurio. Estos datos se comprueban 
+	 * en la base de datos mediante la función CheckLogin y dependiende de las credenciales
+	 * se devolvera un log_result. 
+	 * log_result = -1 --> login incorrecto
+	 * log_result = 0 --> login como usuario cliente
+	 * log_result = 1 --> login como trabajador de la sede.
+	 */
 	public static void Login(){
 		String u_name ="", u_pass="";
-		int log_result = -1;
+		int log_result = -2;
 		Scanner teclado = new Scanner(System.in);
 		while(log_result < 0){
 		System.out.println("");
@@ -44,12 +55,17 @@ public class Sede {
 		
 	}
 	
+	/**
+	 * @brief Función que comprueba el las credenciales en la base de datos
+	 * @param u_name nombre de usuario introducido
+	 * @param u_pass contraseña que se ha introducido
+	 * @return devuelve log_result que determinará el resultado del login.
+	 * log_result = -1 --> login incorrecto
+	 * log_result = 0 --> login como usuario cliente
+	 * log_result = 1 --> login como trabajador de la sede.
+	 */
 	public static int CheckLogin(String u_name, String u_pass, int log_result){
-		/*log_result
-		 * Bad user/pass = -1
-		 * Is user = 0
-		 * Is worker = 1
-		 */
+		
 		  Connection conn = null;
 		  String url = "jdbc:mysql://localhost:3306/";
 		  String dbName = "Termonator";
@@ -68,9 +84,8 @@ public class Sede {
 				  	while(resultset.next()){
 					if(resultset.getString("u_name").equals(u_name) && resultset.getString("u_pass").equals(u_pass)){
 							log_result = Integer.parseInt(resultset.getString("Worker_User"));
-						}
-					else
-						log_result = -1;		
+							return log_result;
+						}	
 					}
 				} catch (SQLException e1) { System.out.println("ERROR executing query");}
 		  }catch(Exception e){System.out.println("ERROR on the DataBase Connection");}
@@ -79,9 +94,18 @@ public class Sede {
 		} catch (SQLException e) {
 			System.out.println("ERROR closing DataBase connection");
 		}
+		  log_result = -1;
 		  return log_result;
 	}
 	
+	/**
+	 * @brief Función que muestra en pantalla el menu diaponible para el usuario cliente.
+	 * Esta función solo se cargará si log_result es igual a 0. Una vez se muestra
+	 * el menú se ejecutará el mismo, mediate la función ExecuteMenuUser.
+	 * @param u_name nombre de usuario introducido que se utiliza para mostrar en el mensaje 
+	 * de bienvenida.
+	 * 
+	 */
 	public static void PrintMenuUser(String u_name){
 		Scanner teclado = new Scanner(System.in);
 		int option = -1;
@@ -102,8 +126,16 @@ public class Sede {
 		ExecuteMenuUser(option,u_name);
 		}
 	}
+	
+	/**
+	 * @brief Función que ejecuta el menu del usuario. Es decir, aquí se llamará
+	 * a las funciones necesarias dependiendo de la elección del usuario en el menú.
+	 * @param option opción introducida por el usuario.
+	 * @param u_name nombre del usuario que nos servirá para las funciones a las que
+	 * se llame.
+	 */
 	public static void ExecuteMenuUser(int option, String u_name){
-		ControlerUser heater = new ControlerUser();
+		ControlerUser heater = new ControlerUser(dbI);
 		switch(option){
 		case 1: heater.HeaterStatus(u_name);
 			break;
@@ -121,6 +153,14 @@ public class Sede {
 		}
 	}
 	
+	/**
+	 * @brief Función que muestra en pantalla el menu diaponible para el usuario trabajador.
+	 * Esta función solo se cargará si log_result es igual a 1. Una vez se muestra
+	 * el menú se ejecutará el mismo, mediante la función ExecuteMenuWorker.
+	 * @param u_name nombre de usuario introducido que se utiliza para mostrar en el mensaje 
+	 * de bienvenida.
+	 * 
+	 */
 	public static void PrintMenuWorker(String u_name){
 		Scanner teclado = new Scanner(System.in);
 		int option =-1;
@@ -137,23 +177,34 @@ public class Sede {
 				"*******************");
 		System.out.print("Your Option: ");
 		option = teclado.nextInt();
-		ExecuteMenuWorker(option);
+		ExecuteMenuWorker(option, u_name);
 		}
 	}
 	
-	public static void ExecuteMenuWorker(int option){
-		BoilerWorker boiler = new BoilerWorker();
-		/*1 --> See consumption
-		 * 2 --> Switch On
-		 * 3 --> ShutDown
-		 */
+	/**
+	 * @brief Función que ejecuta el menu del trabajador. Es decir, aquí se llamará
+	 * a las funciones necesarias dependiendo de la elección del trabajdor en el menú.
+	 * @param option opción introducida por el trabajdor.
+	 * @param u_name 
+	 * @param u_name nombre del trabajador que nos servirá para las funciones a las que
+	 * se llame
+	 */
+	public static void ExecuteMenuWorker(int option, String u_name){
+		BoilerWorker boiler = new BoilerWorker(dbI);
+		int incidents;
+		incidents = dbI.getIncidentCont();
+		if(incidents > 0){
+			System.out.println("New "+incidents+" Incidents");
+			dbI.setIncidentCont(incidents);
+		}
+		int seeConsumption = 1, switchON = 2, switchOFF = 3;
 		
 		switch(option){
-		case 1: boiler.insertNeighbourhood(1);
+		case 1: boiler.insertNeighbourhood(seeConsumption);
 			break;
-		case 2: boiler.insertNeighbourhood(2);
+		case 2: boiler.insertNeighbourhood(switchON);
 			break;
-		case 3: boiler.insertNeighbourhood(3);
+		case 3: boiler.insertNeighbourhood(switchOFF);
 			break;
 		case 0: System.out.println("Bye");
 			break;

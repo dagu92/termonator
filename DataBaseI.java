@@ -12,9 +12,16 @@ import java.util.ArrayList;
 
 public class DataBaseI extends _DataBaseDisp {
 	
-	private ArrayList<Boiler> _BoilerList;
+	public ArrayList<Boiler> _BoilerList = new ArrayList<Boiler>();
+	private int _incidentCont = 0;
 
-	
+	/**
+	 * @brief Función que ejecuta el controlador central de una vecindad, cuando este
+	 * detecta que falla algo dentro de la vecindad. Está función se ejecuta mediante ICE y guardará
+	 * la incidencia en la base de datos del sistema.
+	 * @param Incident es la descripción de la incidencia que ha ocurrida y esta se guardará en la 
+	 * base de datos.
+	 */
 	public void SaveIncident(String Incident, Current __current) {
 		  Connection conn = null;
 		  String url = "jdbc:mysql://localhost:3306/";
@@ -22,16 +29,18 @@ public class DataBaseI extends _DataBaseDisp {
 		  String driver = "com.mysql.jdbc.Driver";
 		  String userName = "Termonator"; 
 		  String password = "termonator";
-		 
+		  _incidentCont ++;
 		  try{
 			  Class.forName(driver).newInstance();
 			  conn = DriverManager.getConnection(url+dbName,userName,password);
 			 
 			  try {
+
 				  PreparedStatement prepStmt = conn.prepareStatement(
 				  	    "INSERT INTO Incidents (I_description) VALUES (?)");
 				  prepStmt.setString(1, Incident);
-					ResultSet resultset = prepStmt.executeQuery();
+				  prepStmt.execute();
+
 				} catch (SQLException e1) {
 					System.out.println("ERROR executing query");
 				}
@@ -45,17 +54,43 @@ public class DataBaseI extends _DataBaseDisp {
 			System.out.println("ERROR closing DataBase connection");
 		}
 	}
-
+	
+	/**
+	 * @brief Función se ejecuta cuando un nuevo controlador central de una vecindad
+	 * se conecta a la red. De este modo se añade a la sede y podremos comunicarnos con el.
+	 * La información se guardará en un arrayList BoilerList de tipo Boiler (una clase creada
+	 * para almacenar los datos).
+	 * @param street se guarda la calle de la vecindad.
+	 * @param portal seguarda el numero del portal de la vecindad
+	 * @param proxy se guarda el proxy del controlador central de la vecindad. De este modo 
+	 * la comunicación mediante ICE será posible.
+	 */
 	public void addBoilerController(String street, int portal, BoilerPrx proxy, 
 	                                Current __current) {
 		Boiler testBoiler = new Boiler(street,portal,proxy);
-		if(!_BoilerList.contains(testBoiler)){
+		boolean repeat = false;
+		for(Boiler item: _BoilerList){
+	    if(item.getStreet().equals(street) && item.getPortal() == portal){
+	    	repeat = true;
+	    	break;
+	    }
+		}
+		if (repeat == false){
 			_BoilerList.add(testBoiler);
 		}
+
 	}
 	
 	public ArrayList<Boiler> getBoilerList(){
     return _BoilerList;
+	}
+	
+	public int getIncidentCont(){
+		return _incidentCont;
+	}
+	
+	public void setIncidentCont(int incident){
+		_incidentCont = incident;
 	}
 
 }
