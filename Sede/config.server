@@ -1,0 +1,9 @@
+ServerAdapter.Endpoints=tcp -h 127.0.0.1 -p 10000
+ServerAdapter.AdapterId=ServerId
+
+#IceSSL
+Ice.Plugin.IceSSL=IceSSL.PluginFactory
+IceSSL.DefaultDir=certs
+IceSSL.Keystore=SiteServer_keys.jks
+IceSSL.Truststore=SiteServer_ca.jks
+IceSSL.Password=termonator

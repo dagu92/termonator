@@ -10,16 +10,19 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import utils.BoilerPrx;
+import utils.FailureIceException;
 /*1 --> See consumption
  * 2 --> Switch On
  * 3 --> ShutDown
  */
 import utils.ItemNotFoundException;
-
+/**
+ * @brief Clase que ofrece las funcionalidades del trabajador.
+ */
 public class BoilerWorker {
   
   private DataBaseI _takeBoilers;
-  private ArrayList<Boiler> _BoilerList;
+  private ArrayList<Boiler> _boilerList;
 	private int _portal, _floor;
 	private String _street, _door;
   public BoilerWorker(DataBaseI dbI) {
@@ -55,6 +58,9 @@ public class BoilerWorker {
       _portal = Integer.valueOf(br.readLine());
     } catch (IOException e) {
       System.out.println("ERROR Inserting DATA");
+      return;
+    }catch (NumberFormatException n){
+    	return;
     }
 		if(!testNeighbourhood(function)){
 		  System.out.println("Invalid Street or Portal");
@@ -78,8 +84,8 @@ public class BoilerWorker {
 	 * @param u_name 
 	 */
 	public boolean testNeighbourhood(int function){
-	  _BoilerList = _takeBoilers.getBoilerList();
-	  for(Boiler item: _BoilerList){
+	  _boilerList = _takeBoilers.getBoilerList();
+	  for(Boiler item: _boilerList){
 	    if(item.getStreet().equals(_street) && item.getPortal() == _portal){
 	      connectToController(item.getBoiler(), function);
 	      return true;
@@ -136,23 +142,33 @@ public class BoilerWorker {
       _door = br.readLine();
     } catch (IOException e) {
       System.out.println("ERROR Inserting DATA");
+      return;
+    }catch (NumberFormatException n){
+    	System.out.println("ERROR Inserting DATA");
+    	return;
     }
     try {
-    	System.out.println("Antes de pedir");
      consumption = boilerPrx.getHeatingConsumption(_floor, _door);
-   	System.out.println("Despues de pedir");
+     System.out.println("The consumption is: "+consumption);
 
-     String u_name = "";
-     u_name = getUsername(u_name);
-     saveConsumption(consumption, u_name);
+     String uName = "";
+     uName = getUsername(uName);
+     saveConsumption(consumption, uName);
     } catch (ItemNotFoundException e) {
       System.out.println("The house that you're consulting doesn't exist or" +
       		"the house is now unvailable");
-      		
+      		return;
+    } catch (FailureIceException e) {
+	    return;
     }
    }
 	
-	public void saveConsumption(double consumption, String u_name){
+	/**
+	 * @brief Función en la que se alamacena el consumo que se ha pedido para una vivienda
+	 * concreta.
+	 * @param uName se utiliza para guardar el consumo dentro del usuario correspondiente
+	 */
+	public void saveConsumption(double consumption, String uName){
 		Connection conn = null;
 		boolean exist = false;
 	  String url = "jdbc:mysql://localhost:3306/";
@@ -167,22 +183,29 @@ public class BoilerWorker {
 			  PreparedStatement prepStmt = conn.prepareStatement(
 			  	    "UPDATE Users SET Consumption = ? WHERE u_name = ?");
 			  prepStmt.setDouble(1, consumption);
-			  prepStmt.setString(2, u_name);
+			  prepStmt.setString(2, uName);
 		  	prepStmt.executeUpdate();	
 			} catch (SQLException e1) {
 				System.out.println("ERROR executing query");
+				return;
 			}	  
 	  }catch(Exception e){
 		  System.out.println("ERROR on the DataBase Connection");
+		  return;
 	  }
 	  try {
 		conn.close();
 	} catch (SQLException e) {
 		System.out.println("ERROR closing DataBase connection");
+		return;
 	}
 	}
-	
-	public String getUsername(String u_name){
+	/**
+	 * @brief Función en la que se busca a un usuario por la dirección de su vivienda. De este modo 
+	 * lograremos el nombre de usuario para posteriormente almacenar el consumo obtenido.
+	 * @param uName recibe la variable en la que almacenará el nombre de usuario obtenido.
+	 */
+	public String getUsername(String uName){
 		
 		  Connection conn = null;
 		  String url = "jdbc:mysql://localhost:3306/";
@@ -203,19 +226,24 @@ public class BoilerWorker {
 				  	ResultSet resultset = prepStmt.executeQuery();
 				  	while(resultset.next()){
 				  		
-				  				u_name = resultset.getString("u_name");
-				  				return u_name;
+				  				uName = resultset.getString("u_name");
+				  				return uName;
 							
 					}
 						
 					
-				} catch (SQLException e1) { System.out.println("ERROR executing query");}
-		  }catch(Exception e){System.out.println("ERROR on the DataBase Connection");}
+				} catch (SQLException e1) { 
+					System.out.println("ERROR executing query");
+					return null;
+					}
+		  }catch(Exception e){System.out.println("ERROR on the DataBase Connection");
+		  return null;}
 		  try {
 			conn.close();
 		} catch (SQLException e) {
 			System.out.println("ERROR closing DataBase connection");
+			return null;
 		}
-		return u_name;
+		return uName;
 	}
 }

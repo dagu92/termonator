@@ -9,17 +9,20 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import utils.BoilerPrx;
+import utils.FailureIceException;
 import utils.InvalidSecretException;
 import utils.ItemNotFoundException;
 
-
+/**
+ * @brief Clase que ofrece las funcionalidades del usuario
+ */
 public class ControlerUser {
 	private String _neighbourhood;
 	private int _portal;
 	private int _floor;
 	private String _door;
 	private DataBaseI _takeBoilers;
-  private ArrayList<Boiler> _BoilerList;
+  private ArrayList<Boiler> _boilerList;
   private BoilerPrx _boilerProxy;
   private String _secret;
   private double _setTemperature, _temperatureStatus;
@@ -39,20 +42,23 @@ public class ControlerUser {
 	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
 	 * usuario dentro de la base de datos. Para ello se ejecuta la función takeFromDataBase.
 	 */
-	public void HeaterStatus(String u_name){
+	public void heaterStatus(String u_name){
 		takeFromDataBase(u_name);
     takeBoilerPrx();
     takeSecret();
     try {
      _status = _boilerProxy.getHeatingStatus(_secret, _floor, _door);
-     System.out.println("Status "+_status);
     } catch (InvalidSecretException e) {
       System.out.println("INCORRECT secret");
+      return;
     } catch (ItemNotFoundException e) {
       System.out.println("Cannot Connect to the House. Put in contact with" +
           "us");
+      return;
+    } catch (FailureIceException e) {
+	    return;
     }
-		if(_status = true){
+		if(_status == true){
 		  try {
         _temperatureStatus = _boilerProxy.getHeatingTemperature(
             _secret, _floor, _door);
@@ -61,14 +67,21 @@ public class ControlerUser {
       } catch (ItemNotFoundException e) {
         System.out.println("Cannot Connect to the House. Put in contact with" +
             "us");
+      } catch (FailureIceException e) {
+	      return;
       }
+			
+		  System.out.println("");
 		  System.out.println("Your heating is ON");
 		  System.out.println("Your heating is established on "+_temperatureStatus+
 		      "ºC");
-		}
-		else 		  System.out.println("Your heating is OFF");
+			}
+			else {
+				System.out.println("");
+			  System.out.println("Your heating is OFF");
+			}
+			  
 
-		
 	}
 	
 	/**
@@ -81,7 +94,7 @@ public class ControlerUser {
 	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
 	 * usuario dentro de la base de datos. Para ello se ejecuta la función takeFromDataBase.
 	 */
-	public void ModifyTemperature(String u_name){
+	public void modifyTemperature(String u_name){
 	  takeFromDataBase(u_name);
     takeBoilerPrx();
     takeSecret();
@@ -91,15 +104,21 @@ public class ControlerUser {
         _setTemperature = Double.valueOf(br.readLine());
       } catch (IOException e) {
         System.out.println("ERROR taking input data");
+        return;
       } 
     try {
       _boilerProxy.changeTemperature(_secret, _floor, _door, _setTemperature);
     } catch (InvalidSecretException e) {
       System.out.println("INCORRECT secret");
+      return;
     } catch (ItemNotFoundException e) {
       System.out.println("Cannot Connect to the House. Put in contact with" +
           "us");
+      return;
+    } catch (FailureIceException e) {
+	    return;
     }
+		System.out.println("");
     System.out.println("Your heating temperature is now established on " 
         +_setTemperature+"ºC");
 	}
@@ -114,11 +133,12 @@ public class ControlerUser {
 	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
 	 * usuario dentro de la base de datos. Para ello se ejecuta la función takeFromDataBase.
 	 */
-	public void SwitchON(String u_name){
+	public void switchON(String u_name){
 	  takeFromDataBase(u_name);
     takeBoilerPrx();
     takeSecret();
-    
+		System.out.println("");
+
     try {
       if(! _boilerProxy.turnOnHeating(_secret, _floor, _door)){
         System.out.println("Your heating is already ON");
@@ -127,9 +147,13 @@ public class ControlerUser {
         System.out.println("Your heating change to ON");
     } catch (InvalidSecretException e) {
       System.out.println("INCORRECT secret");
+      return;
     } catch (ItemNotFoundException e) {
       System.out.println("Cannot Connect to the House. Put in contact with" +
           "us");
+      return;
+    } catch (FailureIceException e) {
+	    return;
     }
 
 	}
@@ -143,11 +167,12 @@ public class ControlerUser {
 	 * @param u_name nombre del usuario que nos servirá para encontrar los datos del controlador del
 	 * usuario dentro de la base de datos. Para ello se ejecuta la función takeFromDataBase.
 	 */
-	public void SwitchOFF(String u_name){
+	public void switchOFF(String u_name){
 	  takeFromDataBase(u_name);
     takeBoilerPrx();
     takeSecret();
-    
+		System.out.println("");
+
     try {
       if(! _boilerProxy.turnOffHeating(_secret, _floor, _door)){
         System.out.println("Your heating is already OFF");
@@ -156,9 +181,13 @@ public class ControlerUser {
         System.out.println("Your heating change to OFF");
     } catch (InvalidSecretException e) {
       System.out.println("INCORRECT secret");
+      return;
     } catch (ItemNotFoundException e) {
       System.out.println("Cannot Connect to the House. Put in contact with" +
           "us");
+      return;
+    } catch (FailureIceException e) {
+	    return;
     }
 	}
 	
@@ -195,12 +224,20 @@ public class ControlerUser {
             _door = resultset.getString("Door");
           }
         }
-      } catch (SQLException e1) { System.out.println("ERROR executing query");}
-    }catch(Exception e){System.out.println("ERROR on the DataBase Connection");}
+      } catch (SQLException e1) { 
+      	System.out.println("ERROR executing query");
+      	return;
+      	}
+    }catch(Exception e){
+    	
+    	System.out.println("ERROR on the DataBase Connection");
+    	return;
+    }
       try {
         conn.close();
     }catch (SQLException e) {
       System.out.println("ERROR closing DataBase connection");
+      return;
     }
 	}
 	
@@ -210,8 +247,8 @@ public class ControlerUser {
 	 * el encargado de establecer la conexión con el controlador de la vivienda correspondiente.
 	 */
 	public void takeBoilerPrx (){
-	  _BoilerList = _takeBoilers.getBoilerList();
-	  for(Boiler item: _BoilerList){
+	  _boilerList = _takeBoilers.getBoilerList();
+	  for(Boiler item: _boilerList){
 	    if(item.getStreet().equals(_neighbourhood) && item.getPortal() == _portal){
 	      _boilerProxy = item.getBoiler();
 	    }
@@ -230,6 +267,7 @@ public class ControlerUser {
       _secret = br.readLine();
     } catch (IOException e) {
       System.out.println("ERROR taking input data");
+      return;
     }
 	}
 }

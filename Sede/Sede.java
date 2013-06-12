@@ -2,10 +2,13 @@ import java.sql.*;
 
 import java.util.Scanner;
 
-
+/**
+ * @brief Clase principal de la aplicación en la que se realiza el login y dependiendo del 
+ * mismo se carga un menú u otro.
+ */
 public class Sede {
-
-	private static DataBaseI dbI;
+	
+	private static DataBaseI _dbI;
 
 	/**
 	 * @author David Gutierrez
@@ -16,11 +19,11 @@ public class Sede {
 		// TODO Auto-generated method stub
 		Ice.Communicator ic = Ice.Util.initialize(args);
 		Ice.ObjectAdapter adapter = ic.createObjectAdapter("ServerAdapter");
-		dbI = new DataBaseI();
-		adapter.add(dbI,ic.stringToIdentity("DataBase"));
+		_dbI = new DataBaseI();
+		adapter.add(_dbI,ic.stringToIdentity("DataBase"));
 		adapter.activate();
 		while (true){
-			Login();
+			login();
 		}
 	}
 	/**
@@ -32,39 +35,39 @@ public class Sede {
 	 * log_result = 0 --> login como usuario cliente
 	 * log_result = 1 --> login como trabajador de la sede.
 	 */
-	public static void Login(){
-		String u_name ="", u_pass="";
-		int log_result = -2;
+	public static void login(){
+		String uName ="", uPass="";
+		int logResult = -2;
 		Scanner teclado = new Scanner(System.in);
-		while(log_result < 0){
+		while(logResult < 0){
 		System.out.println("");
 		System.out.println("Welcome to Termonator 1.0");
 		System.out.println("Login");
 		System.out.print("User: ");
-		u_name = teclado.next();
+		uName = teclado.next();
 		System.out.println("");
 		System.out.print("Password: ");
-		u_pass = teclado.next();
+		uPass = teclado.next();
 		System.out.println("");
-		log_result = CheckLogin(u_name, u_pass, log_result);
-		if (log_result == -1) System.out.println("Invalid Username or Password");
+		logResult = CheckLogin(uName, uPass, logResult);
+		if (logResult == -1) System.out.println("Invalid Username or Password");
 		}
 		
-		if (log_result ==1) PrintMenuWorker(u_name);
-		else PrintMenuUser(u_name);
+		if (logResult ==1) printMenuWorker(uName);
+		else PrintMenuUser(uName);
 		
 	}
 	
 	/**
 	 * @brief Función que comprueba el las credenciales en la base de datos
-	 * @param u_name nombre de usuario introducido
-	 * @param u_pass contraseña que se ha introducido
+	 * @param uName nombre de usuario introducido
+	 * @param uPass contraseña que se ha introducido
 	 * @return devuelve log_result que determinará el resultado del login.
 	 * log_result = -1 --> login incorrecto
 	 * log_result = 0 --> login como usuario cliente
 	 * log_result = 1 --> login como trabajador de la sede.
 	 */
-	public static int CheckLogin(String u_name, String u_pass, int log_result){
+	public static int CheckLogin(String uName, String uPass, int logResult){
 		
 		  Connection conn = null;
 		  String url = "jdbc:mysql://localhost:3306/";
@@ -78,13 +81,13 @@ public class Sede {
 			  conn = DriverManager.getConnection(url+dbName,userName,password);
 			  try {
 				  	PreparedStatement prepStmt = conn.prepareStatement("SELECT * FROM Users WHERE u_name = ? AND u_pass = ?");
-				  	prepStmt.setString(1, u_name);
-				  	prepStmt.setString(2, u_pass);
+				  	prepStmt.setString(1, uName);
+				  	prepStmt.setString(2, uPass);
 				  	ResultSet resultset = prepStmt.executeQuery();
 				  	while(resultset.next()){
-					if(resultset.getString("u_name").equals(u_name) && resultset.getString("u_pass").equals(u_pass)){
-							log_result = Integer.parseInt(resultset.getString("Worker_User"));
-							return log_result;
+					if(resultset.getString("u_name").equals(uName) && resultset.getString("u_pass").equals(uPass)){
+							logResult = Integer.parseInt(resultset.getString("Worker_User"));
+							return logResult;
 						}	
 					}
 				} catch (SQLException e1) { System.out.println("ERROR executing query");}
@@ -94,26 +97,26 @@ public class Sede {
 		} catch (SQLException e) {
 			System.out.println("ERROR closing DataBase connection");
 		}
-		  log_result = -1;
-		  return log_result;
+		  logResult = -1;
+		  return logResult;
 	}
 	
 	/**
 	 * @brief Función que muestra en pantalla el menu diaponible para el usuario cliente.
 	 * Esta función solo se cargará si log_result es igual a 0. Una vez se muestra
 	 * el menú se ejecutará el mismo, mediate la función ExecuteMenuUser.
-	 * @param u_name nombre de usuario introducido que se utiliza para mostrar en el mensaje 
+	 * @param uName nombre de usuario introducido que se utiliza para mostrar en el mensaje 
 	 * de bienvenida.
 	 * 
 	 */
-	public static void PrintMenuUser(String u_name){
+	public static void PrintMenuUser(String uName){
 		Scanner teclado = new Scanner(System.in);
 		int option = -1;
 		while(option != 0){
 		System.out.println("");
 		System.out.println("**********************************************" +
 				"**********************");
-		System.out.println("Welcome "+u_name+" to Termonator 1.0");
+		System.out.println("Welcome "+uName+" to Termonator 1.0");
 		System.out.println("1.- See heater Status");
 		System.out.println("2.- Modify Heater Temperature");
 		System.out.println("3.- Switch ON your heater");
@@ -123,7 +126,7 @@ public class Sede {
 				"**********************");
 		System.out.print("Your Option: ");
 		option = teclado.nextInt();
-		ExecuteMenuUser(option,u_name);
+		executeMenuUser(option,uName);
 		}
 	}
 	
@@ -131,19 +134,19 @@ public class Sede {
 	 * @brief Función que ejecuta el menu del usuario. Es decir, aquí se llamará
 	 * a las funciones necesarias dependiendo de la elección del usuario en el menú.
 	 * @param option opción introducida por el usuario.
-	 * @param u_name nombre del usuario que nos servirá para las funciones a las que
+	 * @param uName nombre del usuario que nos servirá para las funciones a las que
 	 * se llame.
 	 */
-	public static void ExecuteMenuUser(int option, String u_name){
-		ControlerUser heater = new ControlerUser(dbI);
+	public static void executeMenuUser(int option, String uName){
+		ControlerUser heater = new ControlerUser(_dbI);
 		switch(option){
-		case 1: heater.HeaterStatus(u_name);
+		case 1: heater.heaterStatus(uName);
 			break;
-		case 2: heater.ModifyTemperature(u_name);
+		case 2: heater.modifyTemperature(uName);
 			break;
-		case 3: heater.SwitchON(u_name);
+		case 3: heater.switchON(uName);
 			break;
-		case 4: heater.SwitchOFF(u_name);
+		case 4: heater.switchOFF(uName);
 			break;
 		case 0:
 			break;
@@ -157,18 +160,18 @@ public class Sede {
 	 * @brief Función que muestra en pantalla el menu diaponible para el usuario trabajador.
 	 * Esta función solo se cargará si log_result es igual a 1. Una vez se muestra
 	 * el menú se ejecutará el mismo, mediante la función ExecuteMenuWorker.
-	 * @param u_name nombre de usuario introducido que se utiliza para mostrar en el mensaje 
+	 * @param uName nombre de usuario introducido que se utiliza para mostrar en el mensaje 
 	 * de bienvenida.
 	 * 
 	 */
-	public static void PrintMenuWorker(String u_name){
+	public static void printMenuWorker(String uName){
 		Scanner teclado = new Scanner(System.in);
 		int option =-1;
 		while (option != 0){
 		System.out.println("");
 		System.out.println("*************************************************" +
 				"*******************");
-		System.out.println("Welcome "+u_name+" to Termonator 1.0");
+		System.out.println("Welcome "+uName+" to Termonator 1.0");
 		System.out.println("1.- See Consumption of a concrete Home");
 		System.out.println("2.- Switch ON a boiler of a specific neighbourhood");
 		System.out.println("3.- Switch OFF a boiler of a specific neighbourhood");
@@ -177,7 +180,7 @@ public class Sede {
 				"*******************");
 		System.out.print("Your Option: ");
 		option = teclado.nextInt();
-		ExecuteMenuWorker(option, u_name);
+		executeMenuWorker(option);
 		}
 	}
 	
@@ -185,18 +188,15 @@ public class Sede {
 	 * @brief Función que ejecuta el menu del trabajador. Es decir, aquí se llamará
 	 * a las funciones necesarias dependiendo de la elección del trabajdor en el menú.
 	 * @param option opción introducida por el trabajdor.
-	 * @param u_name 
-	 * @param u_name nombre del trabajador que nos servirá para las funciones a las que
+	 * @param uName nombre del trabajador que nos servirá para las funciones a las que
 	 * se llame
 	 */
-	public static void ExecuteMenuWorker(int option, String u_name){
-		BoilerWorker boiler = new BoilerWorker(dbI);
+	public static void executeMenuWorker(int option){
+		BoilerWorker boiler = new BoilerWorker(_dbI);
 		int incidents;
-		incidents = dbI.getIncidentCont();
-		if(incidents > 0){
+		incidents = _dbI.getIncidentCont();
 			System.out.println("New "+incidents+" Incidents");
-			dbI.setIncidentCont(incidents);
-		}
+			_dbI.setIncidentCont(incidents);
 		int seeConsumption = 1, switchON = 2, switchOFF = 3;
 		
 		switch(option){

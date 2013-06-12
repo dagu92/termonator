@@ -10,19 +10,23 @@ import utils.BoilerPrx;
 import utils._DataBaseDisp;
 import java.util.ArrayList;
 
+/**
+ * @brief Clase ofrecida al Controlador central mediante Ice para alamcenar ciertos datos.
+ */
 public class DataBaseI extends _DataBaseDisp {
 	
-	public ArrayList<Boiler> _BoilerList = new ArrayList<Boiler>();
+	public ArrayList<Boiler> _boilerList = new ArrayList<Boiler>();
 	private int _incidentCont = 0;
 
 	/**
 	 * @brief Función que ejecuta el controlador central de una vecindad, cuando este
 	 * detecta que falla algo dentro de la vecindad. Está función se ejecuta mediante ICE y guardará
 	 * la incidencia en la base de datos del sistema.
-	 * @param Incident es la descripción de la incidencia que ha ocurrida y esta se guardará en la 
+	 * @param incident es la descripción de la incidencia que ha ocurrida y esta se guardará en la 
 	 * base de datos.
 	 */
-	public void SaveIncident(String Incident, Current __current) {
+	public void saveIncident(String incident, Current __current) {
+		  /*Ficherop de configuracon. Fichero ptroperties*/
 		  Connection conn = null;
 		  String url = "jdbc:mysql://localhost:3306/";
 		  String dbName = "Termonator";
@@ -35,10 +39,10 @@ public class DataBaseI extends _DataBaseDisp {
 			  conn = DriverManager.getConnection(url+dbName,userName,password);
 			 
 			  try {
-
+			  	System.out.println("Incident "+incident);
 				  PreparedStatement prepStmt = conn.prepareStatement(
 				  	    "INSERT INTO Incidents (I_description) VALUES (?)");
-				  prepStmt.setString(1, Incident);
+				  prepStmt.setString(1, incident);
 				  prepStmt.execute();
 
 				} catch (SQLException e1) {
@@ -69,20 +73,20 @@ public class DataBaseI extends _DataBaseDisp {
 	                                Current __current) {
 		Boiler testBoiler = new Boiler(street,portal,proxy);
 		boolean repeat = false;
-		for(Boiler item: _BoilerList){
+		for(Boiler item: _boilerList){
 	    if(item.getStreet().equals(street) && item.getPortal() == portal){
 	    	repeat = true;
 	    	break;
 	    }
 		}
 		if (repeat == false){
-			_BoilerList.add(testBoiler);
+			_boilerList.add(testBoiler);
 		}
 
 	}
 	
 	public ArrayList<Boiler> getBoilerList(){
-    return _BoilerList;
+    return _boilerList;
 	}
 	
 	public int getIncidentCont(){
